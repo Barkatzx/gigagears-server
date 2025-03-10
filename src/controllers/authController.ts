@@ -16,7 +16,17 @@ export const signup = async (req: Request, res: Response): Promise<void> => {
     await user.save();
 
     const token = generateToken(user);
-    res.status(201).json({ token });
+    res
+      .status(201)
+      .json({
+        token,
+        user: {
+          id: user._id,
+          name: user.name,
+          email: user.email,
+          role: user.role,
+        },
+      });
   } catch (err) {
     res.status(500).json({ message: "Server error" });
   }
