@@ -16,17 +16,15 @@ export const signup = async (req: Request, res: Response): Promise<void> => {
     await user.save();
 
     const token = generateToken(user);
-    res
-      .status(201)
-      .json({
-        token,
-        user: {
-          id: user._id,
-          name: user.name,
-          email: user.email,
-          role: user.role,
-        },
-      });
+    res.status(201).json({
+      token,
+      user: {
+        id: user._id,
+        name: user.name,
+        email: user.email,
+        role: user.role,
+      },
+    });
   } catch (err) {
     res.status(500).json({ message: "Server error" });
   }
@@ -57,4 +55,31 @@ export const login = async (req: Request, res: Response): Promise<void> => {
 
 export const logout = (req: Request, res: Response): void => {
   res.json({ message: "Logged out successfully" });
+};
+
+// Get user profile
+export const getUserProfile = async (
+  req: Request,
+  res: Response
+): Promise<void> => {
+  try {
+    const userId = (req as any).user.id; // Get user ID from authenticated request
+    const user = await User.findById(userId).select("-password"); // Exclude password
+
+    if (!user) {
+      res.status(404).json({ message: "User not found" });
+      return; // Stop execution
+    }
+
+    // Send user profile data
+    res.json({
+      id: user._id,
+      name: user.name,
+      email: user.email,
+      role: user.role,
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Server error" });
+  }
 };

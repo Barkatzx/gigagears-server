@@ -1,5 +1,10 @@
 import express from "express";
-import { login, logout, signup } from "../controllers/authController";
+import {
+  getUserProfile,
+  login,
+  logout,
+  signup,
+} from "../controllers/authController";
 import { isAdmin, isCustomer } from "../middleware/adminMiddleware";
 import { authMiddleware } from "../middleware/authMiddleware";
 
@@ -11,13 +16,16 @@ router.post("/logout", authMiddleware, logout);
 
 //Admin customer dasboard
 // Admin-only route
-router.get("/admin-dashboard", authMiddleware, isAdmin, (req, res) => {
+router.get("/admin", authMiddleware, isAdmin, (req, res) => {
   res.json({ message: "Welcome to the Admin Dashboard" });
 });
 
 // Customer-only route
-router.get("/customer-dashboard", authMiddleware, isCustomer, (req, res) => {
+router.get("/customer", authMiddleware, isCustomer, (req, res) => {
   res.json({ message: "Welcome to the Customer Dashboard" });
 });
+
+// Protected route - requires valid JWT
+router.get("/me", authMiddleware, getUserProfile);
 
 export default router;
