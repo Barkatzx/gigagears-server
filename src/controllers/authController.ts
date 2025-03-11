@@ -4,7 +4,6 @@ import { generateToken } from "../utils/jwtUtils";
 
 export const signup = async (req: Request, res: Response): Promise<void> => {
   const { name, email, password } = req.body;
-
   try {
     const existingUser = await User.findOne({ email });
     if (existingUser) {
@@ -47,14 +46,18 @@ export const login = async (req: Request, res: Response): Promise<void> => {
     }
 
     const token = generateToken(user);
-    res.json({ token });
+    res.json({
+      token,
+      user: {
+        id: user._id,
+        name: user.name,
+        email: user.email,
+        role: user.role,
+      },
+    });
   } catch (err) {
     res.status(500).json({ message: "Server error" });
   }
-};
-
-export const logout = (req: Request, res: Response): void => {
-  res.json({ message: "Logged out successfully" });
 };
 
 // Get user profile
