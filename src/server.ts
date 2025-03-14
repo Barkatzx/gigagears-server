@@ -13,7 +13,7 @@ app.use(cors());
 app.use(bodyParser.json());
 
 // Routes
-app.use("/api/auth", authRoutes);
+app.use("/api/v1", authRoutes);
 
 // Default Route
 app.get("/", (req, res) => {
