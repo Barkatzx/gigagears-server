@@ -1,37 +1,48 @@
 import { Request, RequestHandler, Response } from "express";
+import fs from "fs";
+import cloudinary from "../config/cloudinary";
 import { Product } from "../models/productModel";
 
-export const createProduct = async (req: Request, res: Response) => {
+export const createProduct = async (
+  req: Request,
+  res: Response
+): Promise<void> => {
   try {
-    const { name, price, description, categories, photo } = req.body;
+    const { name, price, description, categories } = req.body;
 
+    if (!req.file) {
+      res.status(400).json({ message: "No file uploaded" });
+      return;
+    }
+
+    console.log("Uploading file to Cloudinary...");
+    const result = await cloudinary.uploader.upload(req.file.path, {
+      folder: "products",
+    });
+    console.log("Cloudinary Upload Result:", result);
+
+    // Create product with Cloudinary image URL
     const product = new Product({
       name,
       price,
       description,
       categories,
-      photo,
+      photo: result.secure_url,
     });
 
     const createdProduct = await product.save();
+    console.log("Created Product:", createdProduct);
+
+    // Delete local file after upload
+    fs.unlinkSync(req.file.path);
 
     res.status(201).json({
-      _id: createdProduct._id,
-      name: createdProduct.name,
-      price: createdProduct.price,
-      description: createdProduct.description,
-      categories: createdProduct.categories,
-      photo: createdProduct.photo,
-      createdAt: createdProduct.createdAt,
+      message: "Product created successfully",
+      product: createdProduct,
     });
-  } catch (error: any) {
-    res.status(400).json({
-      message:
-        error.name === "ValidationError"
-          ? Object.values(error.errors).map((err: any) => err.message)
-          : "Server error",
-      error: process.env.NODE_ENV === "development" ? error : undefined,
-    });
+  } catch (error) {
+    console.error("Product creation failed:", error);
+    res.status(500).json({ message: "Product creation failed", error });
   }
 };
 

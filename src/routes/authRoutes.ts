@@ -27,8 +27,8 @@ router.get("/users", authMiddleware, getAllUsers),
   router.get("/users/:id", authMiddleware, getUserById),
   router.post("/userphoto/:userId", upload.single("photo"), profilePicture);
 //Product All Route
-router.post("/products", authMiddleware, createProduct);
-router.get("/products", authMiddleware, getAllProducts);
+router.post("/addproducts", upload.single("photo"), createProduct);
+router.get("/products", getAllProducts);
 router.get("/products/:id", authMiddleware, getProductById);
 
 export default router;
