@@ -1,4 +1,6 @@
+import { v2 as cloudinary } from "cloudinary";
 import { Request, Response } from "express";
+import fs from "fs";
 import { User } from "../models/userModel";
 import { generateToken } from "../utils/jwtUtils";
 
@@ -125,5 +127,63 @@ export const getUserProfile = async (
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: "Server errorx" });
+  }
+};
+
+// User Profile Picture Upload System
+export const profilePicture = async (
+  req: Request,
+  res: Response
+): Promise<void> => {
+  try {
+    const { userId } = req.params;
+    console.log("User ID from request:", userId);
+
+    if (!req.file) {
+      res.status(400).json({ message: "No file uploaded" });
+      return;
+    }
+
+    // Check if user exists BEFORE updating
+    const user = await User.findById(userId);
+    if (!user) {
+      console.log("User not found in database!");
+      res.status(404).json({ message: "User not found" });
+      return;
+    }
+
+    // Upload to Cloudinary
+    console.log("Uploading file to Cloudinary...");
+    const result = await cloudinary.uploader.upload(req.file.path, {
+      folder: "profile_pictures",
+    });
+    console.log("Cloudinary Upload Result:", result);
+
+    // Update user photo in MongoDB
+    const updatedUser = await User.findByIdAndUpdate(
+      userId,
+      { $set: { photo: result.secure_url } },
+      { new: true, runValidators: true }
+    );
+
+    if (!updatedUser) {
+      console.log("User update failed!");
+      res.status(500).json({ message: "Failed to update user photo" });
+      return;
+    }
+
+    console.log("Updated User:", updatedUser);
+
+    // Delete local file after upload
+    fs.unlinkSync(req.file.path);
+
+    res.json({
+      message: "Photo uploaded successfully",
+      url: result.secure_url,
+      user: updatedUser,
+    });
+  } catch (error) {
+    console.error("Upload failed:", error);
+    res.status(500).json({ message: "Upload failed", error });
   }
 };

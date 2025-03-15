@@ -6,6 +6,7 @@ export interface IUser extends Document {
   email: string;
   password: string;
   role: "admin" | "customer";
+  photo?: string;
   comparePassword(candidatePassword: string): Promise<boolean>;
 }
 
@@ -14,6 +15,7 @@ const userSchema = new Schema({
   email: { type: String, required: true, unique: true },
   password: { type: String, required: true },
   role: { type: String, enum: ["admin", "customer"], default: "customer" },
+  photo: { type: String, default: "" },
 });
 
 userSchema.pre<IUser>("save", async function (next) {

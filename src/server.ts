@@ -1,4 +1,5 @@
 import bodyParser from "body-parser";
+import { v2 as cloudinary } from "cloudinary";
 import cors from "cors";
 import dotenv from "dotenv";
 import express from "express";
@@ -14,6 +15,13 @@ app.use(bodyParser.json());
 
 // Routes
 app.use("/api/v1", authRoutes);
+
+// Cloudinary configuration
+cloudinary.config({
+  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+  api_key: process.env.CLOUDINARY_API_KEY,
+  api_secret: process.env.CLOUDINARY_API_SECRET,
+});
 
 // Default Route
 app.get("/", (req, res) => {
