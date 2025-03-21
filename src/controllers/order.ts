@@ -54,3 +54,36 @@ export const createOrder = async (
     });
   }
 };
+//Get All Orders
+export const getAllOrders = async (
+  req: Request,
+  res: Response
+): Promise<void> => {
+  try {
+    // Fetch all orders from the database
+    const orders = await Order.find().sort({ createdAt: -1 }); // Sort by createdAt in descending order
+
+    // If no orders are found, return a 404 response
+    if (!orders || orders.length === 0) {
+      res.status(404).json({
+        success: false,
+        message: "No orders found",
+      });
+    }
+
+    // Return the orders in the response
+    res.status(200).json({
+      success: true,
+      count: orders.length,
+      data: orders,
+    });
+  } catch (error) {
+    console.error("Error fetching orders:", error);
+
+    // Handle any errors that occur during the database query
+    res.status(500).json({
+      success: false,
+      message: "Server error while fetching orders",
+    });
+  }
+};

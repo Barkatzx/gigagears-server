@@ -8,7 +8,7 @@ import {
   profilePicture,
   signup,
 } from "../controllers/authController";
-import { createOrder } from "../controllers/order";
+import { createOrder, getAllOrders } from "../controllers/order";
 import { createPaymentIntent } from "../controllers/payment";
 import {
   createProduct,
@@ -36,5 +36,6 @@ router.get("/products/:id", getProductById);
 //Payment Route
 router.post("/create-payment-intent", createPaymentIntent);
 router.post("/orders", createOrder);
+router.get("/orders", getAllOrders);
 
 export default router;
