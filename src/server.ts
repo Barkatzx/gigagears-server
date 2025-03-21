@@ -1,9 +1,9 @@
 import bodyParser from "body-parser";
-import { v2 as cloudinary } from "cloudinary";
 import cors from "cors";
 import dotenv from "dotenv";
 import express from "express";
 import connectDB from "./config/db";
+import { errorHandler } from "./middleware/errorOrder";
 import authRoutes from "./routes/authRoutes";
 
 dotenv.config();
@@ -20,6 +20,8 @@ app.use("/api/v1", authRoutes);
 app.get("/", (req, res) => {
   res.send("Hello, Express with TypeScript!");
 });
+
+app.use(errorHandler);
 
 // Start Server
 const PORT = 5000;

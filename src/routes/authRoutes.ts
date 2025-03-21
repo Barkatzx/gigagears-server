@@ -8,6 +8,8 @@ import {
   profilePicture,
   signup,
 } from "../controllers/authController";
+import { createOrder } from "../controllers/order";
+import { createPaymentIntent } from "../controllers/payment";
 import {
   createProduct,
   getAllProducts,
@@ -30,5 +32,9 @@ router.get("/users", authMiddleware, getAllUsers),
 router.post("/addproducts", upload.single("photo"), createProduct);
 router.get("/products", getAllProducts);
 router.get("/products/:id", getProductById);
+
+//Payment Route
+router.post("/create-payment-intent", createPaymentIntent);
+router.post("/orders", createOrder);
 
 export default router;
