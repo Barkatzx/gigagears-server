@@ -3,6 +3,7 @@ import fs from "fs";
 import cloudinary from "../config/cloudinary";
 import { Product } from "../models/productModel";
 
+//Create Product Controller
 export const createProduct = async (
   req: Request,
   res: Response
@@ -46,7 +47,7 @@ export const createProduct = async (
   }
 };
 
-// controllers/productController.ts
+// Get All Product Controller
 export const getAllProducts: RequestHandler = async (
   req,
   res
@@ -79,6 +80,7 @@ export const getAllProducts: RequestHandler = async (
   }
 };
 
+// Get Product By ID Controller
 export const getProductById: RequestHandler = async (
   req,
   res
@@ -92,6 +94,71 @@ export const getProductById: RequestHandler = async (
     }
 
     res.status(200).json(product);
+  } catch (error) {
+    if (error instanceof Error && error.name === "CastError") {
+      res.status(400).json({ message: "Invalid product ID" });
+      return;
+    }
+    res.status(500).json({ message: "Server error" });
+  }
+};
+
+// Update Product Controller
+export const updateProduct = async (
+  req: Request,
+  res: Response
+): Promise<void> => {
+  const { id } = req.params;
+  const { name, price, description } = req.body;
+  let photo = req.file ? req.file.path : null;
+
+  try {
+    // Find the product by ID
+    let product = await Product.findById(id);
+    if (!product) {
+      res.status(404).json({ message: "Product not found" });
+      return; // Exit the function after sending the response
+    }
+
+    // Upload new photo to Cloudinary if provided
+    if (photo) {
+      const result = await cloudinary.uploader.upload(photo, {
+        folder: "products",
+      });
+      product.photo = result.secure_url;
+      fs.unlinkSync(photo); // Delete local file after upload
+    }
+
+    // Update product fields
+    product.name = name || product.name;
+    product.price = price || product.price;
+    product.description = description || product.description;
+
+    // Save the updated product
+    await product.save();
+
+    // Send the updated product as the response
+    res.status(200).json(product);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Server error" });
+  }
+};
+// Delete Product Controller
+export const deleteProduct: RequestHandler = async (
+  req,
+  res
+): Promise<void> => {
+  try {
+    const product = await Product.findById(req.params.id);
+
+    if (!product) {
+      res.status(404).json({ message: "Product not found" });
+      return;
+    }
+
+    await product.deleteOne();
+    res.status(200).json({ message: "Product deleted successfully" });
   } catch (error) {
     if (error instanceof Error && error.name === "CastError") {
       res.status(400).json({ message: "Invalid product ID" });

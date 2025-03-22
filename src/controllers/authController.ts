@@ -1,6 +1,7 @@
 import { v2 as cloudinary } from "cloudinary";
 import { Request, Response } from "express";
 import fs from "fs";
+import { Types } from "mongoose";
 import { User } from "../models/userModel";
 import { generateToken } from "../utils/jwtUtils";
 
@@ -185,5 +186,80 @@ export const profilePicture = async (
   } catch (error) {
     console.error("Upload failed:", error);
     res.status(500).json({ message: "Upload failed", error });
+  }
+};
+
+// Update User Role
+export const roleUpdate = async (
+  req: Request,
+  res: Response
+): Promise<void> => {
+  const { userId } = req.params;
+  const { role } = req.body;
+
+  // Log the userId for debugging
+  console.log("User ID:", userId);
+
+  // Validate the role
+  if (!role || !["admin", "customer"].includes(role)) {
+    res.status(400).json({ message: "Invalid role provided" });
+    return;
+  }
+
+  // Validate the ObjectId
+  const isValidObjectId = Types.ObjectId.isValid(userId);
+  if (!isValidObjectId) {
+    res.status(400).json({ message: "Invalid user ID" });
+    return;
+  }
+
+  try {
+    // Find the user by ID and update their role
+    const updatedUser = await User.findByIdAndUpdate(
+      userId,
+      { role },
+      { new: true } // Return the updated user
+    );
+
+    // Log the updatedUser for debugging
+    console.log("Updated User:", updatedUser);
+
+    if (!updatedUser) {
+      res.status(404).json({ message: "User not found" });
+      return;
+    }
+
+    // Return the updated user
+    res.status(200).json({
+      message: "User role updated successfully",
+      user: updatedUser,
+    });
+  } catch (error) {
+    console.error("Error updating user role:", error);
+    res.status(500).json({ message: "Internal server error" });
+  }
+};
+
+// Delete User
+export const deleteUser = async (
+  req: Request,
+  res: Response
+): Promise<void> => {
+  const { userId } = req.params; // Get the user ID from the request parameters
+
+  try {
+    // Find the user by ID and delete them
+    const deletedUser = await User.findByIdAndDelete(userId);
+
+    if (!deletedUser) {
+      res.status(404).json({ message: "User not found" });
+      return;
+    }
+
+    // Return a success message
+    res.status(200).json({ message: "User deleted successfully" });
+  } catch (error) {
+    console.error("Error deleting user:", error);
+    res.status(500).json({ message: "Internal server error" });
   }
 };
