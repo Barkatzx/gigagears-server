@@ -124,6 +124,7 @@ export const getUserProfile = async (
       name: user.name,
       email: user.email,
       role: user.role,
+      photo: user.photo,
     });
   } catch (error) {
     console.error(error);
