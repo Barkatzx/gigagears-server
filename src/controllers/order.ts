@@ -2,6 +2,7 @@
 import { Request, Response } from "express";
 import { Order } from "../models/ordersModel"; // Adjust path as needed
 
+// Create a new order
 export const createOrder = async (
   req: Request,
   res: Response
@@ -85,5 +86,47 @@ export const getAllOrders = async (
       success: false,
       message: "Server error while fetching orders",
     });
+  }
+};
+// Approve an order
+export const approveOrder = async (
+  req: Request,
+  res: Response
+): Promise<void> => {
+  try {
+    const { orderId } = req.params;
+    const order = await Order.findByIdAndUpdate(
+      orderId,
+      { status: "approved" },
+      { new: true }
+    );
+    if (!order) {
+      res.status(404).json({ message: "Order not found" });
+      return;
+    }
+    res.status(200).json(order);
+  } catch (error) {
+    res.status(500).json({ message: "Internal server error" });
+  }
+};
+
+// Decline an order
+export const declineOrder = async (
+  req: Request,
+  res: Response
+): Promise<void> => {
+  try {
+    const { orderId } = req.params;
+    const order = await Order.findByIdAndUpdate(
+      orderId,
+      { status: "declined" },
+      { new: true }
+    );
+    if (!order) {
+      res.status(404).json({ message: "Order not found" });
+    }
+    res.status(200).json(order);
+  } catch (error) {
+    res.status(500).json({ message: "Internal server error" });
   }
 };

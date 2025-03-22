@@ -10,7 +10,12 @@ import {
   roleUpdate,
   signup,
 } from "../controllers/authController";
-import { createOrder, getAllOrders } from "../controllers/order";
+import {
+  approveOrder,
+  createOrder,
+  declineOrder,
+  getAllOrders,
+} from "../controllers/order";
 import { createPaymentIntent } from "../controllers/payment";
 import {
   createProduct,
@@ -48,5 +53,7 @@ router.delete("/products/:id", authMiddleware, deleteProduct);
 router.post("/create-payment-intent", createPaymentIntent);
 router.post("/orders", createOrder);
 router.get("/orders", getAllOrders);
+router.put("/orders/:orderId/approve", approveOrder);
+router.put("/orders/:orderId/decline", declineOrder);
 
 export default router;

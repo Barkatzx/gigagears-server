@@ -21,7 +21,7 @@ interface IOrder extends mongoose.Document {
   orderItems: IOrderItem[];
   totalPrice: number;
   paymentId: string;
-  status: string;
+  status: "pending" | "approved" | "declined";
   createdAt: Date;
 }
 
@@ -46,7 +46,11 @@ const orderSchema = new mongoose.Schema<IOrder>({
   ],
   totalPrice: { type: Number, required: true },
   paymentId: { type: String, required: true },
-  status: { type: String, default: "Processing" },
+  status: {
+    type: String,
+    enum: ["pending", "approved", "declined"],
+    default: "pending",
+  },
   createdAt: { type: Date, default: Date.now },
 });
 
